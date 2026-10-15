@@ -7,15 +7,15 @@
 
 :root {
   /* Brand Accents */
-  --brand-50: #FAF5FF;
+  --brand-50: #FAF7FF;
   --brand-100: #F3E8FF;
-  --brand-200: #E9D5FF;
-  --brand-300: #D8B4FE;
-  --brand-400: #C084FC;
-  --brand-500: #A855F7;
-  --brand-600: #9333EA;
-  --brand-700: #7E22CE;
-  --brand-800: #6B21A8;
+  --brand-200: #E5D2FF;
+  --brand-300: #D3B2FF;
+  --brand-400: #B482FF;
+  --brand-500: #9149FF;
+  --brand-600: #7A2EE6;
+  --brand-700: #6418CC;
+  --brand-800: #4F0EB3;
 
   --teal-500: #14B8A6;
   --teal-600: #0D9488;
@@ -42,17 +42,17 @@
 
   --border-subtle: #E2E8F0;
   --border-default: #CBD5E1;
-  --border-focus: #9333EA;
+  --border-focus: #9149FF;
 
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-muted: #64748B;
   --text-dim: #94A3B8;
 
-  --primary: #7E22CE;
-  --primary-hover: #6B21A8;
-  --primary-subtle: #FAF5FF;
-  --primary-border: #E9D5FF;
+  --primary: #9149FF;
+  --primary-hover: #7A2EE6;
+  --primary-subtle: #FAF7FF;
+  --primary-border: #E5D2FF;
 
   --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
   --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
@@ -80,17 +80,17 @@
 
   --border-subtle: #1E293B;
   --border-default: #334155;
-  --border-focus: #C084FC;
+  --border-focus: #B482FF;
 
   --text-primary: #F8FAFC;
   --text-secondary: #CBD5E1;
   --text-muted: #94A3B8;
   --text-dim: #64748B;
 
-  --primary: #A855F7;
-  --primary-hover: #C084FC;
-  --primary-subtle: rgba(168, 85, 247, 0.12);
-  --primary-border: rgba(168, 85, 247, 0.28);
+  --primary: #9149FF;
+  --primary-hover: #A76BFF;
+  --primary-subtle: rgba(145, 73, 255, 0.15);
+  --primary-border: rgba(145, 73, 255, 0.35);
 
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
@@ -563,7 +563,7 @@ button, input, select, textarea {
 .btn-primary {
   background: var(--primary);
   color: #FFFFFF;
-  box-shadow: 0 1px 3px rgba(126, 34, 206, 0.3);
+  box-shadow: 0 1px 3px rgba(145, 73, 255, 0.35);
 }
 .btn-primary:hover {
   background: var(--primary-hover);
@@ -977,7 +977,7 @@ tbody tr:last-child td {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.tag-fleet { background: rgba(147, 51, 234, 0.12); color: var(--primary); border: 1px solid var(--primary-border); }
+.tag-fleet { background: rgba(145, 73, 255, 0.12); color: var(--primary); border: 1px solid var(--primary-border); }
 .tag-field { background: rgba(13, 148, 136, 0.12); color: var(--teal-600); border: 1px solid rgba(13, 148, 136, 0.3); }
 
 .arrow-up {
@@ -1515,7 +1515,7 @@ tbody tr:last-child td {
 
 /* Pareto Banner */
 .pareto-banner {
-  background: linear-gradient(135deg, rgba(147, 51, 234, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(145, 73, 255, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
   border: 1px solid var(--primary-border);
   border-radius: 12px;
   padding: 24px;
