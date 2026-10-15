@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DiGGrowth — ICP & Competitor Intelligence Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div id="global-progress"></div>
+
+<div id="app-container">
+
+  <!-- Left Sidebar Navigation -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-wrapper">
+        <img src="data/Light%20Theme.svg" alt="DiGGrowth" class="brand-logo-img logo-light">
+        <img src="data/Dark%20Theme.svg" alt="DiGGrowth" class="brand-logo-img logo-dark">
+      </div>
+      <span class="brand-badge" style="font-size:9.5px;padding:2px 6px;border-radius:4px;background:var(--primary-subtle);border:1px solid var(--primary-border);white-space:nowrap;">ICP 2.0</span>
+    </div>
+
+    <!-- Active Workspace -->
+    <div class="workspace-card">
+      <div class="workspace-name">
+        <span class="workspace-dot"></span>
+        <span id="ws-company-name">GPS Insight</span>
+      </div>
+      <span class="workspace-badge" id="ws-company-code">GPS</span>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav">
+      
+      <!-- Primary Section: ICP Analysis -->
+      <div class="nav-group">
+        <button class="primary-tab-btn active" id="btn-tab-icp" onclick="switchPrimaryTab('icp')">
+          <div class="primary-tab-btn-content">
+            <span class="primary-tab-icon"><svg class="svg-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></span>
+            <span>ICP Analysis</span>
+          </div>
+          <span class="primary-tab-badge" id="badge-icp-count">4,832</span>
+        </button>
+        <div class="subnav-list" id="subnav-icp">
+          <button class="subnav-btn active" data-sub="combos" onclick="switchSubTab('combos')">Top Segments</button>
+          <button class="subnav-btn" data-sub="industry" onclick="switchSubTab('industry')">Vertical Insights</button>
+          <button class="subnav-btn" data-sub="customers" onclick="switchSubTab('customers')">Customer Analysis</button>
+          <button class="subnav-btn" data-sub="prospects" onclick="switchSubTab('prospects')">Prospects</button>
+          <button class="subnav-btn" data-sub="pbyseg" onclick="switchSubTab('pbyseg')">Prospects by Segment</button>
+          <button class="subnav-btn" data-sub="seasonality" onclick="switchSubTab('seasonality')">Seasonality</button>
+          <button class="subnav-btn" data-sub="contacts" onclick="switchSubTab('contacts')">Contact Scores</button>
+          <button class="subnav-btn" data-sub="overview" onclick="switchSubTab('overview')">Pareto Threshold</button>
+        </div>
+      </div>
+
+      <!-- Primary Section: Competitor Analysis -->
+      <div class="nav-group">
+        <button class="primary-tab-btn" id="btn-tab-comp" onclick="switchPrimaryTab('comp')">
+          <div class="primary-tab-btn-content">
+            <span class="primary-tab-icon"><svg class="svg-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></span>
+            <span>Competitor Analysis</span>
+          </div>
+          <span class="primary-tab-badge" id="badge-comp-count">10 Rivals</span>
+        </button>
+        <div class="subnav-list" id="subnav-comp" style="display: none;">
+          <button class="subnav-btn active" data-sub="comp-profiles" onclick="switchSubTab('comp-profiles')">Competitor Profiles</button>
+          <button class="subnav-btn" data-sub="comp-book" onclick="switchSubTab('comp-book')">Customer Book</button>
+          <button class="subnav-btn" data-sub="comp-overlap" onclick="switchSubTab('comp-overlap')">Prospect Overlap</button>
+          <button class="subnav-btn" data-sub="comp-lookalikes" onclick="switchSubTab('comp-lookalikes')">Lookalikes Console</button>
+        </div>
+      </div>
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <!-- Light / Dark Switcher -->
+      <div class="theme-switch-wrapper">
+        <button class="theme-opt-btn active" id="theme-btn-light" onclick="setTheme('light')">
+          <svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> Light
+        </button>
+        <button class="theme-opt-btn" id="theme-btn-dark" onclick="setTheme('dark')">
+          <svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Dark
+        </button>
+      </div>
+
+      <div class="api-status-bar">
+        <span class="api-pulse">
+          <span class="api-dot"></span>
+          <span id="api-status-text">Live API Connected</span>
+        </span>
+        <span id="api-latency">34ms</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Layout -->
+  <main id="main-wrapper">
+    
+    <!-- Top Header Bar -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumbs">
+          <span class="crumb-root" id="crumb-root-text">ICP Analysis</span>
+          <span class="crumb-sep">/</span>
+          <span class="crumb-current" id="crumb-sub-text">Top Segments</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <button class="btn btn-secondary btn-sm" id="btn-toggle-filters" onclick="toggleFilterBar()">
+          <svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Filters
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btn-rerun-pipeline" onclick="reRunPipeline()">
+          <span id="rerun-icon"><svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span> Run Pipeline
+        </button>
+        <button class="btn btn-primary btn-sm" id="btn-top-export" onclick="exportCurrentView()">
+          <svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Export CSV
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Scrollable Body -->
+    <div id="content-scrollable">
+
+      <!-- Global Filter Bar -->
+      <div class="filter-card" id="global-filter-bar">
+        <div class="filter-group">
+          <span class="filter-label">Filters</span>
+          
+          <!-- Brand Filter -->
+          <div class="dropdown-wrapper" id="wrap-filter-brand">
+            <button class="dropdown-trigger" onclick="toggleDropdown('drop-brand')">
+              <span>Brand</span>
+              <span class="dropdown-count-badge" id="badge-brand-count">0</span>
+              <span style="font-size:10px">&#9662;</span>
+            </button>
+            <div class="dropdown-menu" id="drop-brand">
+              <div class="dropdown-header-tools">
+                <button class="btn-sm btn-outline" style="padding:2px 8px;font-size:11px" onclick="selectAllFilter('brand')">All</button>
+                <button class="btn-sm btn-outline" style="padding:2px 8px;font-size:11px" onclick="selectNoneFilter('brand')">None</button>
+              </div>
+              <input type="text" class="dropdown-search" placeholder="Search brands..." oninput="filterDropdownOptions('brand', this.value)">
+              <div id="options-brand-list"></div>
+            </div>
+          </div>
+
+          <!-- Business Unit Filter -->
+          <div class="dropdown-wrapper" id="wrap-filter-bu">
+            <button class="dropdown-trigger" onclick="toggleDropdown('drop-bu')">
+              <span>Business Unit</span>
+              <span class="dropdown-count-badge" id="badge-bu-count">0</span>
+              <span style="font-size:10px">&#9662;</span>
+            </button>
+            <div class="dropdown-menu" id="drop-bu">
+              <div class="dropdown-header-tools">
+                <button class="btn-sm btn-outline" style="padding:2px 8px;font-size:11px" onclick="selectAllFilter('bu')">All</button>
+                <button class="btn-sm btn-outline" style="padding:2px 8px;font-size:11px" onclick="selectNoneFilter('bu')">None</button>
+              </div>
+              <input type="text" class="dropdown-search" placeholder="Search BUs..." oninput="filterDropdownOptions('bu', this.value)">
+              <div id="options-bu-list"></div>
+            </div>
+          </div>
+
+          <!-- Partner Filter -->
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;color:var(--text-secondary)">
+            <input type="checkbox" id="chk-partner" style="accent-color:var(--primary)" onchange="applyFilters()">
+            Include Partners
+          </label>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn btn-outline btn-sm" onclick="clearFilters()">Clear All</button>
+          <button class="btn btn-primary btn-sm" onclick="applyFilters()">Apply</button>
+        </div>
+      </div>
+
+      <!-- Executive KPI Cards -->
+      <div class="kpi-grid" id="executive-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">Total Accounts</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line><line x1="9" y1="18" x2="9" y2="18.01"></line><line x1="15" y1="18" x2="15" y2="18.01"></line></svg></div>
+          </div>
+          <div class="kpi-value" id="kpi-total-accounts">–</div>
+          <div class="kpi-subtext" id="kpi-total-customers-sub">in CRM database</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">ICP Customers</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+          </div>
+          <div class="kpi-value" id="kpi-icp-customers" style="color:var(--primary)">–</div>
+          <div class="kpi-subtext" id="kpi-icp-pct-sub">– of total accounts</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">Total Revenue</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+          </div>
+          <div class="kpi-value" id="kpi-total-revenue">–</div>
+          <div class="kpi-subtext">all won deals</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">ICP Revenue</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
+          </div>
+          <div class="kpi-value" id="kpi-icp-revenue" style="color:var(--emerald-500)">–</div>
+          <div class="kpi-subtext" id="kpi-rev-pct-sub">– of total revenue</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">Median CLV (ICP)</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"></path><path d="M11 3v8"></path><path d="M13 3v8"></path></svg></div>
+          </div>
+          <div class="kpi-value" id="kpi-median-clv">–</div>
+          <div class="kpi-subtext">per ICP customer</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">Median Deal Size</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
+          </div>
+          <div class="kpi-value" id="kpi-median-deal">–</div>
+          <div class="kpi-subtext">per closed deal</div>
+        </div>
+      </div>
+
+      <!-- Competitor KPI Cards (Competitors, Their Customers, GPS Prospects, Already in List) -->
+      <div class="kpi-grid" id="competitor-kpi-grid" style="display:none;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));margin-bottom:24px">
+        <div class="kpi-card clickable-row" onclick="switchSubTab('comp-profiles')" title="Click to view Competitor Profiles">
+          <div class="kpi-card-header">
+            <span class="kpi-label" style="letter-spacing:0.14em;font-family:var(--font-mono)">COMPETITORS</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
+          </div>
+          <div class="kpi-value" id="comp-kpi-count" style="color:var(--primary);font-size:32px;font-family:var(--font-mono);font-weight:700">10</div>
+          <div class="kpi-subtext">tracked market incumbents</div>
+        </div>
+
+        <div class="kpi-card clickable-row" onclick="switchSubTab('comp-book')" title="Click to view Customer Book">
+          <div class="kpi-card-header">
+            <span class="kpi-label" style="letter-spacing:0.14em;font-family:var(--font-mono)">THEIR CUSTOMERS</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+          </div>
+          <div class="kpi-value" id="comp-kpi-customers" style="color:var(--primary);font-size:32px;font-family:var(--font-mono);font-weight:700">136</div>
+          <div class="kpi-subtext">observed customer accounts</div>
+        </div>
+
+        <div class="kpi-card clickable-row" onclick="switchSubTab('comp-lookalikes')" title="Click to view Lookalikes Console">
+          <div class="kpi-card-header">
+            <span class="kpi-label" style="letter-spacing:0.14em;font-family:var(--font-mono)">GPS PROSPECTS</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
+          </div>
+          <div class="kpi-value" id="comp-kpi-prospects" style="color:var(--primary);font-size:32px;font-family:var(--font-mono);font-weight:700">81,898</div>
+          <div class="kpi-subtext">scored prospect target pool</div>
+        </div>
+
+        <div class="kpi-card clickable-row" onclick="switchSubTab('comp-overlap')" title="Click to view Prospect Overlap">
+          <div class="kpi-card-header">
+            <span class="kpi-label" style="letter-spacing:0.14em;font-family:var(--font-mono)">ALREADY IN LIST</span>
+            <div class="kpi-icon-pill"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+          </div>
+          <div class="kpi-value" id="comp-kpi-overlap" style="color:var(--primary);font-size:32px;font-family:var(--font-mono);font-weight:700">54</div>
+          <div class="kpi-subtext">direct displacement matches</div>
+        </div>
+      </div>
+
+      <!-- ==================================================================
+           ICP SUB-VIEWS
+           ================================================================== -->
+
+      <!-- 1. TOP SEGMENTS (combos) -->
+      <section class="sub-view-section" id="sec-combos">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Top Multi-Dimensional Segments</h2>
+              <p class="panel-desc">Best performing ICP clusters ranked by weighted score — combining Vertical, Industry Category, Headcount, Revenue, and Geography.</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportCombosCSV()">Export Segments</button>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Segment Combination</th>
+                  <th class="num">Accounts</th>
+                  <th class="num">Avg CLV vs Median</th>
+                  <th class="num">ICP Score</th>
+                  <th class="num">Win Rate</th>
+                  <th class="num">Open Pipeline</th>
+                  <th class="num">Weighted Score</th>
+                </tr>
+              </thead>
+              <tbody id="combos-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="combos-pager"></div>
+        </div>
+      </section>
+
+      <!-- 2. VERTICAL INSIGHTS -->
+      <section class="sub-view-section" id="sec-industry" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Vertical Intelligence & Market Fit</h2>
+              <p class="panel-desc" id="industry-lead-text">Strongest industry verticals identified among ICP accounts.</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div style="background:var(--bg-subtle);padding:3px;border-radius:8px;display:flex;gap:4px">
+                <button class="btn btn-sm btn-primary" id="btn-ind-vertical" onclick="setIndustryDimension('Industry')">Vertical</button>
+                <button class="btn btn-sm btn-outline" id="btn-ind-sub" onclick="setIndustryDimension('Sub-Industry')">Industry Category</button>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="exportIndustryCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="vertical-grid" id="industry-cards-grid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. CUSTOMER ANALYSIS -->
+      <section class="sub-view-section" id="sec-customers" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Customer Analysis</h2>
+              <p class="panel-desc">All verified ICP customer accounts (<span id="ca-total-badge" class="highlight-val">0</span>) ranked by score. Click any column header to sort.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="text" class="input-search" id="ca-search-input" placeholder="Search account name or ID..." oninput="onSearchCustomers(this.value)">
+              <button class="btn btn-outline btn-sm" onclick="exportCustomersCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable" onclick="sortCustomers('Account ID')">Account ID</th>
+                  <th class="sortable" onclick="sortCustomers('Account Name')">Account Name</th>
+                  <th class="sortable" onclick="sortCustomers('Industry')">Vertical</th>
+                  <th class="sortable" onclick="sortCustomers('Sub-Industry')">Category</th>
+                  <th class="sortable" onclick="sortCustomers('Geo')">Geo</th>
+                  <th class="sortable num" onclick="sortCustomers('Employees')">Employees</th>
+                  <th class="sortable num" onclick="sortCustomers('Annual Revenue (converted)')">Annual Revenue</th>
+                  <th class="sortable" onclick="sortCustomers('Brand__c')">Brand</th>
+                  <th class="sortable num" onclick="sortCustomers('clv')">CLV</th>
+                  <th class="sortable num" onclick="sortCustomers('won_deals')">Won Deals</th>
+                  <th class="sortable num" onclick="sortCustomers('win_rate')">Win Rate</th>
+                  <th class="sortable num" onclick="sortCustomers('good_customer')">ICP Score</th>
+                </tr>
+              </thead>
+              <tbody id="customers-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="customers-pager"></div>
+        </div>
+      </section>
+
+      <!-- 4. PROSPECTS -->
+      <section class="sub-view-section" id="sec-prospects" style="display:none;">
+        
+        <!-- Prospect Grade Breakdown -->
+        <div class="kpi-grid" id="prospect-grade-counts-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Feature Importances Dual Grid -->
+        <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));gap:18px;margin-bottom:22px;">
+          <div class="card-panel" style="margin-bottom:0">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title" style="font-size:15px"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg> ML Lookalike Weights</h3>
+                <p class="panel-desc">Top predictive signals from trained model</p>
+              </div>
+            </div>
+            <div id="ml-feature-importance-bars"></div>
+          </div>
+
+          <div class="card-panel" style="margin-bottom:0">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title" style="font-size:15px"><svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg> Rule-Based Dimension Weights</h3>
+                <p class="panel-desc">Calculated ICP separation coefficients</p>
+              </div>
+            </div>
+            <div id="rule-feature-importance-bars"></div>
+          </div>
+        </div>
+
+        <!-- Prospects DataTable -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Prospects</h2>
+              <p class="panel-desc">Non-customer accounts scored on resemblance to top customers.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="text" class="input-search" id="prospects-search-input" placeholder="Search account name..." oninput="onSearchProspects(this.value)">
+              <button class="btn btn-outline btn-sm" onclick="exportProspectsCSV()">Export Full CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th class="num">#</th>
+                  <th>Account ID</th>
+                  <th>Account Name</th>
+                  <th>Vertical</th>
+                  <th>Category</th>
+                  <th>Geo</th>
+                  <th class="num">Employees</th>
+                  <th class="num">Revenue</th>
+                  <th class="num">Total Score</th>
+                  <th style="text-align:center">Total</th>
+                  <th class="num">ML Score</th>
+                  <th style="text-align:center">ML</th>
+                  <th class="num">Rule Score</th>
+                  <th style="text-align:center">Rule</th>
+                  <th class="num">Engage Score</th>
+                  <th style="text-align:center">Eng</th>
+                </tr>
+              </thead>
+              <tbody id="prospects-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="prospects-pager"></div>
+        </div>
+      </section>
+
+      <!-- 5. PROSPECTS BY SEGMENT -->
+      <section class="sub-view-section" id="sec-pbyseg" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Prospects by Segment</h2>
+              <p class="panel-desc">Target account clusters mapping highest-fit prospects directly to proven ICP customer segments.</p>
+            </div>
+            <div style="background:var(--bg-subtle);padding:3px;border-radius:8px;display:flex;gap:4px">
+              <button class="btn btn-sm btn-primary" id="btn-pbyseg-ind" onclick="setPSAnchor('Industry')">Vertical</button>
+              <button class="btn btn-sm btn-outline" id="btn-pbyseg-sub" onclick="setPSAnchor('Sub-Industry')">Industry Category</button>
+            </div>
+          </div>
+
+          <div id="pbyseg-accordion-container">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. SEASONALITY -->
+      <section class="sub-view-section" id="sec-seasonality" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Seasonality</h2>
+              <p class="panel-desc">Historical closed-won timing across top ICP verticals to optimize campaign launch dates.</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <div style="background:var(--bg-subtle);padding:3px;border-radius:8px;display:flex;gap:4px">
+                <button class="btn btn-sm btn-primary" id="btn-sz-ind" onclick="setSeasonalityDim('Industry')">Vertical</button>
+                <button class="btn btn-sm btn-outline" id="btn-sz-sub" onclick="setSeasonalityDim('Sub-Industry')">Industry Category</button>
+              </div>
+              <div style="background:var(--bg-subtle);padding:3px;border-radius:8px;display:flex;gap:4px">
+                <button class="btn btn-sm btn-primary" id="btn-sz-cnt" onclick="setSeasonalityMetric('count')">Deal Count</button>
+                <button class="btn btn-sm btn-outline" id="btn-sz-amt" onclick="setSeasonalityMetric('amount')">Deal Amount ($)</button>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="exportSeasonalityCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <!-- Date Range Quick Filters -->
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-right:6px">Range</span>
+            <button class="btn btn-outline btn-sm sz-range-btn" onclick="setSeasonalityRange('3m')">3M</button>
+            <button class="btn btn-outline btn-sm sz-range-btn" onclick="setSeasonalityRange('6m')">6M</button>
+            <button class="btn btn-outline btn-sm sz-range-btn" onclick="setSeasonalityRange('1y')">1Y</button>
+            <button class="btn btn-outline btn-sm sz-range-btn" onclick="setSeasonalityRange('2y')">2Y</button>
+            <button class="btn btn-outline btn-sm sz-range-btn" onclick="setSeasonalityRange('3y')">3Y</button>
+            <button class="btn btn-outline btn-sm sz-range-btn" onclick="setSeasonalityRange('5y')">5Y</button>
+            <button class="btn btn-primary btn-sm sz-range-btn" onclick="setSeasonalityRange('all')">All</button>
+          </div>
+
+          <!-- Series Chips Filter -->
+          <div id="sz-series-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px"></div>
+
+          <!-- Line Chart -->
+          <div style="position:relative;height:380px;margin-bottom:30px">
+            <canvas id="chart-seasonality-timeline"></canvas>
+          </div>
+
+          <!-- Seasonal Monthly Index Bar Chart -->
+          <div class="panel-header" style="margin-top:20px;border-top:1px solid var(--border-subtle);padding-top:20px">
+            <div>
+              <h3 class="panel-title" style="font-size:16px">Seasonal Month-of-Year Pattern</h3>
+              <p class="panel-desc">Normalized activity index vs yearly mean (1.0 = baseline average)</p>
+            </div>
+          </div>
+          <div style="position:relative;height:320px">
+            <canvas id="chart-seasonal-index"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. CONTACT SCORES -->
+      <section class="sub-view-section" id="sec-contacts" style="display:none;">
+        <div class="kpi-grid" id="contacts-kpi-grid">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Unified Contact Intelligence</h2>
+              <p class="panel-desc">Scoring individual buyers combining ICP fit, decision-maker seniority, engagement, and recency.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <select id="ct-filter-type" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="loadContactsReset()">
+                <option value="">All Account Types</option>
+              </select>
+              <select id="ct-filter-grade" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="loadContactsReset()">
+                <option value="">All Grades</option>
+                <option value="A">Grade A</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+              </select>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+                <input type="checkbox" id="ct-chk-dm" style="accent-color:var(--primary)" onchange="loadContactsReset()">
+                Decision Makers Only
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+                <input type="checkbox" id="ct-chk-hs" style="accent-color:var(--primary)" onchange="loadContactsReset()">
+                In HubSpot Only
+              </label>
+              <input type="text" class="input-search" id="ct-search-input" placeholder="Search name or email..." oninput="onSearchContacts(this.value)">
+              <button class="btn btn-outline btn-sm" onclick="exportContactsCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th class="num">#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Title / Role</th>
+                  <th>Account</th>
+                  <th>Type</th>
+                  <th class="num">Unified Score</th>
+                  <th style="text-align:center">Grade</th>
+                  <th class="num">ICP Fit</th>
+                  <th class="num">Role Fit</th>
+                  <th class="num">Engage</th>
+                  <th class="num">Recency</th>
+                  <th style="text-align:center">HubSpot</th>
+                </tr>
+              </thead>
+              <tbody id="contacts-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="contacts-pager"></div>
+        </div>
+      </section>
+
+      <!-- 8. PARETO THRESHOLD -->
+      <section class="sub-view-section" id="sec-overview" style="display:none;">
+        <div class="pareto-banner">
+          <div class="pareto-headline" id="pareto-headline-text">
+            <b>–%</b> of accounts capture <b>–%</b> of revenue.
+          </div>
+          <p style="font-size:13.5px;color:var(--text-secondary);margin-top:8px">
+            High customer value concentration allows hyper-targeted sales & marketing focus. 
+            Review the highest-weight segments or explore the full prospect lookalikes.
+          </p>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Pareto Threshold & Concentration Breakdown</h2>
+              <p class="panel-desc">Comparison between Ideal Customer Profile accounts and the general customer base.</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="exportOverviewCSV()">Export Metrics</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th class="num">ICP Segment</th>
+                  <th class="num">Overall Baseline</th>
+                  <th class="num">Concentration Multiplier</th>
+                </tr>
+              </thead>
+              <tbody id="overview-metrics-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================
+           COMPETITOR SUB-VIEWS
+           ================================================================== -->
+
+      <!-- 1. COMPETITOR PROFILES -->
+      <section class="sub-view-section" id="sec-comp-profiles" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Competitor ICP Signatures & Sizing</h2>
+              <p class="panel-desc">Empirical profiles of 10 primary fleet & field incumbents derived from observed customer bases.</p>
+            </div>
+          </div>
+
+          <div class="competitor-grid" id="comp-profiles-grid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CUSTOMER BOOK -->
+      <section class="sub-view-section" id="sec-comp-book" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Observed Competitor Customer Book</h2>
+              <p class="panel-desc">Every competitor customer account verified, with match flag where company already exists in your pipeline.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <input type="text" class="input-search" id="comp-book-search" placeholder="Search customer or industry..." oninput="filterCompBook()">
+              <select id="comp-book-filter-comp" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompBook()">
+                <option value="">All Competitors</option>
+              </select>
+              <select id="comp-book-filter-ind" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompBook()">
+                <option value="">All Industries</option>
+              </select>
+              <select id="comp-book-filter-flag" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompBook()">
+                <option value="">All Accounts</option>
+                <option value="1">In GPS Prospect List Only</option>
+                <option value="0">Not in Prospect List</option>
+              </select>
+              <button class="btn btn-outline btn-sm" onclick="exportCompBookCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Competitor</th>
+                  <th>Industry</th>
+                  <th>Industry Detail</th>
+                  <th class="num">Revenue</th>
+                  <th class="num">Employees</th>
+                  <th>Country</th>
+                  <th>In GPS List</th>
+                </tr>
+              </thead>
+              <tbody id="comp-book-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="comp-book-pager"></div>
+        </div>
+      </section>
+
+      <!-- 3. PROSPECT OVERLAP -->
+      <section class="sub-view-section" id="sec-comp-overlap" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Prospect Overlap & Incumbent Displacement</h2>
+              <p class="panel-desc">Direct displacement opportunities: competitor customers verified to exist in your prospect database.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <input type="text" class="input-search" id="comp-ov-search" placeholder="Search account name..." oninput="filterCompOverlap()">
+              <select id="comp-ov-filter-comp" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompOverlap()">
+                <option value="">All Competitors</option>
+              </select>
+              <select id="comp-ov-filter-tier" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompOverlap()">
+                <option value="">All Match Tiers</option>
+                <option value="Exact">Exact Match</option>
+                <option value="Likely">Likely Match</option>
+                <option value="Review">Needs Review</option>
+              </select>
+              <button class="btn btn-outline btn-sm" onclick="exportCompOverlapCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Incumbent</th>
+                  <th>Competitor Customer</th>
+                  <th>Matched GPS Account</th>
+                  <th>Match Tier</th>
+                  <th>Customer Industry</th>
+                  <th class="num">Prospect Employees</th>
+                  <th>Brand</th>
+                  <th class="num">ML Score</th>
+                  <th style="text-align:center">Grade</th>
+                </tr>
+              </thead>
+              <tbody id="comp-overlap-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="comp-overlap-pager"></div>
+        </div>
+      </section>
+
+      <!-- 4. LOOKALIKES CONSOLE -->
+      <section class="sub-view-section" id="sec-comp-lookalikes" style="display:none;">
+        <div class="card-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Competitor Lookalike Scoring Console</h2>
+              <p class="panel-desc">Prospects matching incumbent customer profiles scored on headcount, revenue, vertical, and geography.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <input type="text" class="input-search" id="comp-lk-search" placeholder="Search prospect..." oninput="filterCompLookalikes()">
+              <select id="comp-lk-filter-comp" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompLookalikes()">
+                <option value="">All Competitors</option>
+              </select>
+              <select id="comp-lk-filter-grade" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompLookalikes()">
+                <option value="">All ML Grades</option>
+                <option value="A">Grade A</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+              </select>
+              <select id="comp-lk-filter-min" style="padding:7px 10px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-input);color:var(--text-primary);font-size:12px" onchange="filterCompLookalikes()">
+                <option value="0">Any Similarity</option>
+                <option value="60">60% +</option>
+                <option value="70">70% +</option>
+                <option value="80">80% +</option>
+              </select>
+              <button class="btn btn-outline btn-sm" onclick="exportCompLookalikesCSV()">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>GPS Prospect</th>
+                  <th>Industry</th>
+                  <th class="num">Employees</th>
+                  <th>Brand</th>
+                  <th class="num">Similarity</th>
+                  <th>Looks Like</th>
+                  <th>Incumbent</th>
+                  <th class="num">ML Score</th>
+                  <th style="text-align:center">Grade</th>
+                </tr>
+              </thead>
+              <tbody id="comp-lookalikes-table-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="comp-lookalikes-pager"></div>
+        </div>
+      </section>
+
+    </div><!-- /content-scrollable -->
+  </main>
+
+  <!-- ==================================================================
+       SLIDE-OVER DRAWER MODAL
+       ================================================================== -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="if(event.target===this)closeDrawer()">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="drawer-title" id="drawer-title">Drilldown Analysis</span>
+          <span class="drawer-subtitle" id="drawer-subtitle">Accounts matching criteria</span>
+        </div>
+        <button class="drawer-close-btn" onclick="closeDrawer()">&times;</button>
+      </div>
+      <div class="drawer-tools">
+        <input type="text" class="input-search" id="drawer-search-input" placeholder="Search drawer accounts..." oninput="onDrawerSearch(this.value)">
+        <div style="display:flex;gap:10px;align-items:center">
+          <span style="font-size:12px;color:var(--text-muted)" id="drawer-count-badge">0 accounts</span>
+          <button class="btn btn-primary btn-sm" onclick="exportDrawerCSV()">Export CSV</button>
+        </div>
+      </div>
+      <div class="drawer-body">
+        <div class="table-responsive" style="border:none;border-radius:0">
+          <table>
+            <thead>
+              <tr id="drawer-thead">
+                <!-- Injected via JS -->
+              </tr>
+            </thead>
+            <tbody id="drawer-tbody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <div class="pagination-bar" id="drawer-pager" style="margin-top:0"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-container -->
+
+<!-- Data Modules -->
+<script src="data/competitor_data.js"></script>
+<script src="data/icp_fallback_data.js"></script>
+<!-- Application Script -->
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "diggrowth-icp-dashboard",
+  "version": "1.0.0",
+  "description": "DiGGrowth ICP Intelligence & Competitor Analysis Dashboard",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "bun --watch server.js",
+    "start": "bun server.js",
+    "tunnel": ".\\cloudflared.exe tunnel --url http://localhost:8088"
+  },
+  "keywords": [
+    "icp",
+    "competitor-analysis",
+    "dashboard",
+    "diggrowth"
+  ],
+  "author": "DiGGrowth",
+  "license": "ISC"
+}

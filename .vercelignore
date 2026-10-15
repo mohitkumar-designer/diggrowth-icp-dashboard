@@ -1,0 +1,7 @@
+cloudflared.exe
+run_dashboard.bat
+server.js
+.git
+.github
+node_modules
+*.log
