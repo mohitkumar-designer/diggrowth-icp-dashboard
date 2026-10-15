@@ -4,7 +4,148 @@
  */
 
 const API_BASE = 'https://api.diggrowth.com';
-const COMPANY = 'GPS';
+const COMPANY = 'APX';
+const COMPANY_NAME = 'Apex Technologies';
+
+const INDUSTRY_MAP = {
+  'Construction': 'Cloud Infrastructure',
+  'Plumbing & HVAC': 'Enterprise SaaS',
+  'Transport & Logistics': 'FinTech & Payments',
+  'Transport': 'FinTech & Payments',
+  'Electrical': 'Cybersecurity & Identity',
+  'Facilities & Field Services': 'HealthTech & Diagnostics',
+  'Facilities Management': 'HealthTech & Diagnostics',
+  'Landscaping': 'Industrial Automation & IoT',
+  'Landscape Services': 'Industrial Automation & IoT',
+  'Retail': 'Digital Commerce & MarTech',
+  'Wholesale & Distribution': 'Data Analytics & AI',
+  'Wholesale Trade': 'Data Analytics & AI',
+  'Manufacturing': 'CleanTech & Smart Energy',
+  'Auto Services': 'Autonomous Mobility',
+  'Government & Public': 'GovTech & Public Sector',
+  'Government': 'GovTech & Public Sector',
+  'Telecom & Technology': 'Telecom & 5G Networks',
+  'Utilities & Energy': 'BioTech & Life Sciences',
+  'Utilities': 'Modern Energy Grids',
+  'Professional & Business Services': 'Strategic Advisory & HR Tech',
+  'Business Services': 'Strategic Advisory & HR Tech',
+  'Services - Business': 'Strategic Advisory & HR Tech',
+  'Waste Management': 'Environmental Systems',
+  'Education': 'EdTech & Workforce',
+  'Lumber': 'DevOps & Developer Platforms',
+  'Property & Real Estate': 'PropTech & Asset Systems',
+  'Medical': 'Medical Robotics & Health',
+  'Finance': 'Financial Intelligence & Banking',
+  'Agriculture': 'AgriTech & BioFood',
+  'Oil & Gas': 'Sustainable Energy Systems',
+  'Security': 'SecOps & Zero Trust',
+  'Healthcare': 'Digital Health Platforms',
+  'Unclassified': 'Emerging Technologies',
+  'IoT & Fleet Telematics': 'Cloud Infrastructure & Networks',
+  'Fleet Management & Safety': 'Enterprise Cloud & Security',
+  'Connected Vehicle Data': 'Distributed Data Systems',
+  'Field Service Management': 'Automated Workflow Platforms',
+  'Trade Contractor Software': 'Vertical Enterprise SaaS',
+  'Home Services Software': 'Digital Operations Platforms'
+};
+
+const SUB_INDUSTRY_MAP = {
+  'Contractors - Plumbing': 'Core Business Platforms',
+  'Contractors - Building': 'Cloud Architecture',
+  'Services - Business': 'Enterprise Operations',
+  'Construction - Residential': 'Edge Computing Networks',
+  'Transport - Ground': 'Payment Processing',
+  'Contractors - Electrical': 'Identity & Access Mgmt',
+  'Landscape Services': 'Connected Device Networks',
+  'Wholesaler - Equipment': 'Data Pipeline Infrastructure',
+  'Construction - Non-Residential': 'Hybrid Cloud Systems',
+  'Construction - Heavy': 'Mission-Critical Infrastructure',
+  'Retail - Household': 'Consumer Experience Platforms',
+  'Lumber': 'DevOps & Tooling',
+  'Manufacturing - Industrial': 'Smart Grid Automation',
+  'Services - Pest Control': 'Risk & Compliance Systems',
+  'Maintenance - Household': 'Customer Experience Tech',
+  'Retail - Food': 'Direct-to-Consumer Commerce',
+  'Utilities - Electric': 'Renewable Grid Software',
+  'Rental - Buildings/Real Estate': 'Asset Management Software',
+  'Retail - Construction': 'Infrastructure Marketplace',
+  'Government - Municipality': 'Municipal Cloud Services',
+  'Maintenance - Automotive': 'Mobility Diagnostics',
+  'Services - Waste Management': 'Resource Recovery Tech',
+  'Wholesaler - Electronic': 'Semiconductor Supply Chain',
+  'Medical Office': 'Ambulatory Care Tech',
+  'Transport - Towing': 'Emergency Dispatch Tech',
+  'Wholesaler - Construction': 'Distributed Data Storage',
+  'Retail - Auto Related': 'Mobility Commerce',
+  'Landscape - Tree Services': 'Environmental Sensors',
+  'Rental - Machinery': 'Equipment Orchestration',
+  'Utilities - Gas': 'Smart Distribution Grids',
+  'Education - Other': 'Learning Management Platforms',
+  'Oil & Gas': 'Energy Resource Tech',
+  'Wholesaler - Retail': 'Omnichannel Data Hubs',
+  'Farming': 'Smart Precision Agriculture',
+  'Services - Security': 'Cloud Defense & SecOps',
+  'Recreational': 'Lifestyle & Member Tech',
+  'Community Services': 'Civic Engagement Platforms',
+  'Manufacturing - Electronic': 'NextGen Hardware Tech',
+  'Utilities - Water': 'Hydro Resources Tech',
+  'Manufacturing - Stone/Mineral': 'Advanced Materials Tech',
+  'Warehousing': 'Intelligent Fulfillment Systems',
+  'Banking': 'Digital Banking Core',
+  'Manufacturing - Chemical': 'BioChemical Synthesis',
+  'Wholesaler - Auto': 'Connected Fleet Logistics',
+  'Services - Legal/Financial': 'LegalTech & Compliance',
+  'Manufacturing - Food': 'FoodTech Manufacturing',
+  'Education - Elementary/Secondary': 'K-12 Digital Learning',
+  'Manufacturing - Metallic': 'Advanced Metallurgy Tech',
+  'Wholesaler - Medical': 'MedTech Distribution',
+  'Manufacturing - Auto Related': 'Autonomous Component Systems',
+  'Civic & Social Organizations': 'Social Impact Platforms',
+  'Medical Care Facility': 'Clinical Workflow Systems',
+  'Government - Public Administration': 'Civic Data Infrastructure',
+  'Government - Police/Fire': 'Public Safety Dispatch',
+  'Telecom': 'NextGen Telecom',
+  'Entertainment': 'Interactive Digital Media',
+  'Mining': 'Resource Extraction Robotics',
+  'Education - Higher Ed': 'Campus Cloud Systems',
+  'Wholesaler - Metallic': 'Raw Materials Trading',
+  'Rental - Auto': 'Shared Fleet Software',
+  'Transport - Air': 'Cross-Border Settlements',
+  'Manufacturing - Household': 'Smart Appliance Tech',
+  'Manufacturing - Paper/Products': 'BioPackaging Tech',
+  'Education - Libraries': 'Digital Knowledge Repositories',
+  'Wholesaler - Industrial': 'B2B Industrial Marketplace',
+  'Manufacturing - Lumber': 'Sustainable Forest Tech',
+  'Wholesaler - Food': 'Supply Chain Intelligence',
+  'Transport - Sea': 'Global Ocean Freight Tech',
+  'Insurance': 'InsurTech & Underwriting',
+  'Senior living': 'Care Intelligence',
+  'Home services': 'Field Operations Platform',
+  'Pest control': 'Automated Monitoring',
+  'Freight forwarding and logistics': 'Autonomous Freight Tech'
+};
+
+function mapIndustry(ind) {
+  if (!ind) return ind;
+  return INDUSTRY_MAP[ind] || ind;
+}
+
+function mapSubIndustry(sub) {
+  if (!sub) return sub;
+  return SUB_INDUSTRY_MAP[sub] || SUB_INDUSTRY_MAP[sub.trim()] || mapIndustry(sub);
+}
+
+function mapComboString(str) {
+  if (!str) return str;
+  let res = str;
+  for (const [k, v] of Object.entries(SUB_INDUSTRY_MAP)) {
+    res = res.split(k).join(v);
+  }
+  for (const [k, v] of Object.entries(INDUSTRY_MAP)) {
+    res = res.split(k).join(v);
+  }
+  return res;
+}
 
 // Global Application State
 const STATE = {
@@ -524,12 +665,18 @@ async function loadCombos() {
 
 function parseComboDims(c) {
   const dims = [];
-  if (c.anchor) dims.push({ k: c.anchor_type || 'Vertical', v: c.anchor });
+  if (c.anchor) dims.push({ k: c.anchor_type || 'Vertical', v: mapIndustry(c.anchor) });
   const names = (c.dimensions || '').split(' | ');
   const vals = (c.values || '').split(' | ');
   for (let i = 0; i < names.length; i++) {
     const n = names[i].trim();
-    if (n) dims.push({ k: n === 'Industry' ? 'Vertical' : n === 'Sub-Industry' ? 'Category' : n, v: vals[i] ? vals[i].trim() : '' });
+    if (n) {
+      let val = vals[i] ? vals[i].trim() : '';
+      if (n === 'Industry') val = mapIndustry(val);
+      else if (n === 'Sub-Industry') val = mapSubIndustry(val);
+      else val = mapComboString(val);
+      dims.push({ k: n === 'Industry' ? 'Vertical' : n === 'Sub-Industry' ? 'Category' : n, v: val });
+    }
   }
   return dims;
 }
@@ -1298,7 +1445,7 @@ function renderCompetitorProfiles() {
           <div class="comp-stat-val">${c.customer_count} accounts</div>
         </div>
         <div>
-          <span class="comp-stat-lbl">In GPS Prospect List</span>
+          <span class="comp-stat-lbl">In Target Prospect List</span>
           <div class="comp-stat-val" style="color:${hits ? 'var(--emerald-500)' : 'var(--text-muted)'}">${hits} overlaps</div>
         </div>
       </div>
@@ -1306,7 +1453,7 @@ function renderCompetitorProfiles() {
       <div class="comp-fit-section">
         <div class="comp-fit-count">
           <b>${fmtN(c.icp_match_count)}</b>
-          <span>GPS Prospects Fit Profile</span>
+          <span>Target Prospects Fit Profile</span>
         </div>
         <button class="btn btn-primary btn-sm" onclick="openCompLookalikesDrawer(${idx})" ${c.icp_match_count ? '' : 'disabled'}>
           View ${fmtN(c.icp_match_count)} Accounts &rarr;
@@ -1325,7 +1472,7 @@ function openCompLookalikesDrawer(idx) {
   const matches = c.icp_matches || [];
   openGenericDrawer(
     c.competitor + ' ICP Match Accounts',
-    `${fmtN(c.icp_match_count)} GPS prospects matching criteria (${c.criteria.emp_band} emp, ${c.criteria.rev_band} rev)`,
+    `${fmtN(c.icp_match_count)} target prospects matching criteria (${c.criteria.emp_band} emp, ${c.criteria.rev_band} rev)`,
     [
       { k: 'account_name', label: 'Account Name', bold: true },
       { k: 'account_id', label: 'Account ID', mono: true },
