@@ -147,6 +147,28 @@ function mapComboString(str) {
   return res;
 }
 
+const COMPETITOR_MAP = {
+  'Samsara': 'OmniRoute Dynamics',
+  'Motive': 'Vanguard Mobility',
+  'Geotab': 'TerraSync Global',
+  'Verizon Connect': 'Horizon Telematics',
+  'Verizon': 'Horizon Telematics',
+  'Azuga': 'Velociti Cloud',
+  'OneStep Systems': 'Zenith Fleet Systems',
+  'One Step GPS': 'Zenith Fleet Systems',
+  'OneStep': 'Zenith Fleet Systems',
+  'Jobber': 'TaskPro Cloud',
+  'Housecall Pro': 'ServiceHub Pro',
+  'Housecall': 'ServiceHub Pro',
+  'ServiceTitan': 'AtlasField Platform',
+  'FieldEdge': 'PrismField Operations'
+};
+
+function mapCompetitor(comp) {
+  if (!comp) return comp;
+  return COMPETITOR_MAP[comp] || comp;
+}
+
 // Global Application State
 const STATE = {
   theme: localStorage.getItem('diggrowth_theme') || 'light',
@@ -294,6 +316,34 @@ function downloadCSV(rows, filename) {
 /* ==========================================================================
    API & Data Fetching with Seamless Fallback
    ========================================================================== */
+function sanitizeData(data) {
+  if (!data) return data;
+  if (Array.isArray(data)) {
+    return data.map(item => sanitizeData(item));
+  }
+  if (typeof data === 'object') {
+    const copy = { ...data };
+    for (const key of Object.keys(copy)) {
+      if (typeof copy[key] === 'string') {
+        const val = copy[key];
+        if (key === 'Industry' || key === 'industry') {
+          copy[key] = mapIndustry(val);
+        } else if (key === 'Sub-Industry' || key === 'sub_industry') {
+          copy[key] = mapSubIndustry(val);
+        } else if (key === 'competitor') {
+          copy[key] = mapCompetitor(val);
+        } else if (key === 'Brand__c' || key === 'brand') {
+          if (val === 'GPSI' || val === 'GPS') copy[key] = 'APXI';
+        }
+      } else if (typeof copy[key] === 'object' && copy[key] !== null) {
+        copy[key] = sanitizeData(copy[key]);
+      }
+    }
+    return copy;
+  }
+  return data;
+}
+
 async function fetchAPI(endpoint, fallbackKey) {
   showProgress();
   const startTime = Date.now();
@@ -306,7 +356,7 @@ async function fetchAPI(endpoint, fallbackKey) {
     $('api-status-text').textContent = 'Live API Connected';
     $('api-status-text').style.color = 'inherit';
     hideProgress();
-    return json.data;
+    return sanitizeData(json.data);
   } catch (err) {
     console.warn('Live API request failed for', endpoint, '; using cached fallback data.', err);
     $('api-status-text').textContent = 'Offline Cache Mode';
@@ -314,7 +364,7 @@ async function fetchAPI(endpoint, fallbackKey) {
     $('api-latency').textContent = 'cached';
     hideProgress();
     if (window.ICP_FALLBACK_DATA && fallbackKey && window.ICP_FALLBACK_DATA[fallbackKey]) {
-      return window.ICP_FALLBACK_DATA[fallbackKey];
+      return sanitizeData(window.ICP_FALLBACK_DATA[fallbackKey]);
     }
     return null;
   }
@@ -784,19 +834,21 @@ async function loadIndustry() {
   let html = '';
   rows.forEach(r => {
     const win = r.avg_win_rate != null ? (r.avg_win_rate * 100).toFixed(0) + '%' : '—';
-    const valKey = String(r.value).replace(/'/g, "\\'");
+    const displayName = indDimension === 'Industry' ? mapIndustry(r.value) : mapSubIndustry(r.value);
+    const valKey = String(displayName).replace(/'/g, "\\'");
+    const rawValKey = String(r.value).replace(/'/g, "\\'");
     const paramKey = indDimension === 'Industry' ? 'industry' : 'sub_industry';
 
     html += `<div class="vertical-card">
-      <div class="vertical-card-title">${esc(r.value)}</div>
+      <div class="vertical-card-title">${esc(displayName)}</div>
       <div class="vertical-card-count"><b>${fmtN(r.accounts)}</b> ICP customers</div>
       <div class="vertical-card-metrics">
         <span>Avg CLV ${fmt(r.avg_clv)}${clvArrow(r.avg_clv)}</span>
         <span style="font-weight:700">Win ${win}</span>
       </div>
       <div class="vertical-card-actions">
-        <button class="vertical-act-btn cust" onclick="openAccountsDrawer('${valKey}', 'ICP Customers', { ${paramKey}: '${valKey}' })">View Customers &rarr;</button>
-        <button class="vertical-act-btn prosp" onclick="openProspectsDrawer('${valKey}', 'Prospect Accounts', { ${paramKey}: '${valKey}' })">View Prospects &rarr;</button>
+        <button class="vertical-act-btn cust" onclick="openAccountsDrawer('${valKey}', 'ICP Customers', { ${paramKey}: '${rawValKey}' })">View Customers &rarr;</button>
+        <button class="vertical-act-btn prosp" onclick="openProspectsDrawer('${valKey}', 'Prospect Accounts', { ${paramKey}: '${rawValKey}' })">View Prospects &rarr;</button>
       </div>
     </div>`;
   });
@@ -807,7 +859,10 @@ function exportIndustryCSV() {
   const endpoint = `/icp/dimensions?company=${encodeURIComponent(COMPANY)}${buildFilterQuery()}`;
   fetchAPI(endpoint, 'dimensions').then(data => {
     if (!data) return;
-    const rows = data.filter(r => r.dimension === indDimension);
+    const rows = data.filter(r => r.dimension === indDimension).map(r => ({
+      ...r,
+      value: indDimension === 'Industry' ? mapIndustry(r.value) : mapSubIndustry(r.value)
+    }));
     downloadCSV(rows, 'vertical_insights_' + indDimension.toLowerCase() + '.csv');
   });
 }
@@ -838,15 +893,16 @@ function renderCustomersTable() {
 
   let html = '';
   rows.forEach(r => {
+    const brandVal = (r.Brand__c === 'GPSI' || r.Brand__c === 'GPS') ? 'APXI' : (r.Brand__c || '—');
     html += `<tr>
       <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted)">${esc(r['Account ID'])}</td>
       <td><b>${esc(r['Account Name'])}</b></td>
-      <td>${esc(r.Industry || '—')}</td>
-      <td>${esc(r['Sub-Industry'] || '—')}</td>
+      <td>${esc(mapIndustry(r.Industry) || '—')}</td>
+      <td>${esc(mapSubIndustry(r['Sub-Industry']) || '—')}</td>
       <td>${esc(r.Geo || '—')}</td>
       <td class="num">${fmtN(r.Employees)}</td>
       <td class="num">${fmt(r['Annual Revenue (converted)'])}</td>
-      <td><span class="pill pill-review">${esc(r.Brand__c || '—')}</span></td>
+      <td><span class="pill pill-review">${esc(brandVal)}</span></td>
       <td class="num highlight-val">${fmt(r.clv)}</td>
       <td class="num">${fmtN(r.won_deals)}</td>
       <td class="num">${r.win_rate != null ? (r.win_rate * 100).toFixed(1) + '%' : '—'}</td>
@@ -976,8 +1032,8 @@ function renderProspectsTable() {
       <td class="num" style="color:var(--text-muted)">${STATE.prospects.offset + idx + 1}</td>
       <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted)">${esc(p['Account ID'])}</td>
       <td><b>${esc(p['Account Name'])}</b></td>
-      <td>${esc(p.Industry || '—')}</td>
-      <td>${esc(p['Sub-Industry'] || '—')}</td>
+      <td>${esc(mapIndustry(p.Industry) || '—')}</td>
+      <td>${esc(mapSubIndustry(p['Sub-Industry']) || '—')}</td>
       <td>${esc(p.Geo || '—')}</td>
       <td class="num">${fmtN(p.Employees)}</td>
       <td class="num">${fmt(p['Annual Revenue (converted)'])}</td>
@@ -1403,7 +1459,8 @@ function renderCompetitorProfiles() {
 
   const overlapMap = {};
   overlaps.forEach(o => {
-    overlapMap[o.competitor] = (overlapMap[o.competitor] || 0) + 1;
+    const compName = mapCompetitor(o.competitor);
+    overlapMap[compName] = (overlapMap[compName] || 0) + 1;
   });
 
   const gen = cd.generated_from || {};
@@ -1415,21 +1472,23 @@ function renderCompetitorProfiles() {
   const grid = $('comp-profiles-grid');
   let html = '';
   comps.forEach((c, idx) => {
-    const hits = overlapMap[c.competitor] || 0;
+    const compName = mapCompetitor(c.competitor);
+    const hits = overlapMap[compName] || overlapMap[c.competitor] || 0;
 
     let stripHtml = '';
     let legendHtml = '';
     (c.top_industries || []).forEach(t => {
-      const col = getIndColor(t.industry);
-      stripHtml += `<i style="width:${t.share}%;background:${col}" title="${esc(t.industry)}: ${t.share}%"></i>`;
-      legendHtml += `<span><em style="background:${col}"></em>${esc(t.industry)} (${t.share}%)</span>`;
+      const indName = mapIndustry(t.industry);
+      const col = getIndColor(indName);
+      stripHtml += `<i style="width:${t.share}%;background:${col}" title="${esc(indName)}: ${t.share}%"></i>`;
+      legendHtml += `<span><em style="background:${col}"></em>${esc(indName)} (${t.share}%)</span>`;
     });
 
     html += `<div class="competitor-card">
       <div class="competitor-header">
         <div>
-          <div class="competitor-name">${esc(c.competitor)}</div>
-          <div class="competitor-meta">${esc(c.primary_industry)} &middot; ${esc(c.est_revenue)} &middot; ${esc(c.hq_country)}</div>
+          <div class="competitor-name">${esc(compName)}</div>
+          <div class="competitor-meta">${esc(mapIndustry(c.primary_industry))} &middot; ${esc(c.est_revenue)} &middot; ${esc(c.hq_country)}</div>
         </div>
         <span class="tag-cat ${c.category === 'Fleet' ? 'tag-fleet' : 'tag-field'}">${esc(c.category)}</span>
       </div>
@@ -1469,9 +1528,14 @@ function openCompLookalikesDrawer(idx) {
   const c = cd.competitors[idx];
   if (!c) return;
 
-  const matches = c.icp_matches || [];
+  const compName = mapCompetitor(c.competitor);
+  const matches = (c.icp_matches || []).map(m => ({
+    ...m,
+    industry: mapIndustry(m.industry),
+    industry_detail: mapSubIndustry(m.industry_detail)
+  }));
   openGenericDrawer(
-    c.competitor + ' ICP Match Accounts',
+    compName + ' ICP Match Accounts',
     `${fmtN(c.icp_match_count)} target prospects matching criteria (${c.criteria.emp_band} emp, ${c.criteria.rev_band} rev)`,
     [
       { k: 'account_name', label: 'Account Name', bold: true },
@@ -1485,7 +1549,7 @@ function openCompLookalikesDrawer(idx) {
       { k: 'ml_grade', label: 'Grade', grade: true }
     ],
     matches,
-    `icp_matches_${c.competitor.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.csv`
+    `icp_matches_${compName.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.csv`
   );
 }
 
@@ -1498,12 +1562,16 @@ function renderCompBook() {
   const overlaps = cd.overlap || [];
 
   const overlapMap = {};
-  overlaps.forEach(o => overlapMap[o.competitor + '|' + o.customer_name] = o);
+  overlaps.forEach(o => {
+    const cName = mapCompetitor(o.competitor);
+    overlapMap[cName + '|' + o.customer_name] = o;
+    overlapMap[o.competitor + '|' + o.customer_name] = o;
+  });
 
   // Populate Selects if empty
   const selComp = $('comp-book-filter-comp');
   if (selComp.options.length <= 1) {
-    const comps = [...new Set(customers.map(c => c.competitor))].sort();
+    const comps = [...new Set(customers.map(c => mapCompetitor(c.competitor)))].sort();
     comps.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c;
@@ -1514,7 +1582,7 @@ function renderCompBook() {
 
   const selInd = $('comp-book-filter-ind');
   if (selInd.options.length <= 1) {
-    const inds = [...new Set(customers.map(c => c.industry))].sort();
+    const inds = [...new Set(customers.map(c => mapIndustry(c.industry)))].sort();
     inds.forEach(i => {
       const opt = document.createElement('option');
       opt.value = i;
@@ -1531,7 +1599,11 @@ function filterCompBook() {
   const customers = cd.customers || [];
   const overlaps = cd.overlap || [];
   const overlapMap = {};
-  overlaps.forEach(o => overlapMap[o.competitor + '|' + o.customer_name] = o);
+  overlaps.forEach(o => {
+    const cName = mapCompetitor(o.competitor);
+    overlapMap[cName + '|' + o.customer_name] = o;
+    overlapMap[o.competitor + '|' + o.customer_name] = o;
+  });
 
   const q = $('comp-book-search').value.toLowerCase().trim();
   const comp = $('comp-book-filter-comp').value;
@@ -1539,9 +1611,11 @@ function filterCompBook() {
   const flag = $('comp-book-filter-flag').value;
 
   const filtered = customers.filter(r => {
-    const isOverlap = !!overlapMap[r.competitor + '|' + r.name];
-    if (comp && r.competitor !== comp) return false;
-    if (ind && r.industry !== ind) return false;
+    const compName = mapCompetitor(r.competitor);
+    const indName = mapIndustry(r.industry);
+    const isOverlap = !!overlapMap[compName + '|' + r.name] || !!overlapMap[r.competitor + '|' + r.name];
+    if (comp && compName !== comp && r.competitor !== comp) return false;
+    if (ind && indName !== ind && r.industry !== ind) return false;
     if (flag === '1' && !isOverlap) return false;
     if (flag === '0' && isOverlap) return false;
     if (q && !(r.name + ' ' + (r.industry_detail || '')).toLowerCase().includes(q)) return false;
@@ -1562,12 +1636,14 @@ function filterCompBook() {
 
   let html = '';
   page.forEach(r => {
-    const ov = overlapMap[r.competitor + '|' + r.name];
+    const compName = mapCompetitor(r.competitor);
+    const indName = mapIndustry(r.industry);
+    const ov = overlapMap[compName + '|' + r.name] || overlapMap[r.competitor + '|' + r.name];
     html += `<tr>
       <td><b>${esc(r.name)}</b>${r.website ? `<div style="font-size:11px"><a href="${esc(r.website)}" target="_blank" style="color:var(--primary)">${esc(r.website.replace(/^https?:\/\//, ''))}</a></div>` : ''}</td>
-      <td>${esc(r.competitor)} <span class="tag-cat ${r.category === 'Fleet' ? 'tag-fleet' : 'tag-field'}">${esc(r.category)}</span></td>
-      <td><span style="color:${getIndColor(r.industry)};font-weight:600">${esc(r.industry)}</span></td>
-      <td style="color:var(--text-muted)">${esc(r.industry_detail || '—')}</td>
+      <td>${esc(compName)} <span class="tag-cat ${r.category === 'Fleet' ? 'tag-fleet' : 'tag-field'}">${esc(r.category)}</span></td>
+      <td><span style="color:${getIndColor(indName)};font-weight:600">${esc(indName)}</span></td>
+      <td style="color:var(--text-muted)">${esc(mapSubIndustry(r.industry_detail) || '—')}</td>
       <td class="num">${esc(r.revenue || '—')}</td>
       <td class="num">${esc(r.employees || '—')}</td>
       <td>${esc(r.country || 'USA')}</td>
@@ -1591,7 +1667,7 @@ function renderCompOverlap() {
 
   const selComp = $('comp-ov-filter-comp');
   if (selComp.options.length <= 1) {
-    const comps = [...new Set(overlaps.map(o => o.competitor))].sort();
+    const comps = [...new Set(overlaps.map(o => mapCompetitor(o.competitor)))].sort();
     comps.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c;
@@ -1612,7 +1688,8 @@ function filterCompOverlap() {
   const tier = $('comp-ov-filter-tier').value;
 
   const filtered = overlaps.filter(o => {
-    if (comp && o.competitor !== comp) return false;
+    const compName = mapCompetitor(o.competitor);
+    if (comp && compName !== comp && o.competitor !== comp) return false;
     if (tier && o.match_tier !== tier) return false;
     if (q && !(o.customer_name + ' ' + o.prospect_name).toLowerCase().includes(q)) return false;
     return true;
@@ -1632,15 +1709,18 @@ function filterCompOverlap() {
 
   let html = '';
   page.forEach(o => {
+    const compName = mapCompetitor(o.competitor);
+    const indName = mapIndustry(o.customer_industry);
     const tierPill = o.match_tier === 'Exact' ? 'pill-exact' : o.match_tier === 'Likely' ? 'pill-likely' : 'pill-review';
+    const brandVal = (o.prospect_brand === 'GPSI' || o.prospect_brand === 'GPS') ? 'APXI' : (o.prospect_brand || '—');
     html += `<tr>
-      <td><b>${esc(o.competitor)}</b><div style="font-size:10.5px;color:var(--text-muted)">${esc(o.competitor_category)}</div></td>
-      <td>${esc(o.customer_name)}<div style="font-size:10.5px;color:var(--text-muted)">${esc(o.customer_industry_detail || '')}</div></td>
+      <td><b>${esc(compName)}</b><div style="font-size:10.5px;color:var(--text-muted)">${esc(o.competitor_category)}</div></td>
+      <td>${esc(o.customer_name)}<div style="font-size:10.5px;color:var(--text-muted)">${esc(mapSubIndustry(o.customer_industry_detail) || '')}</div></td>
       <td><b>${esc(o.prospect_name)}</b><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${esc(o.prospect_account_id)}</div></td>
       <td><span class="pill ${tierPill}">${esc(o.match_tier)}</span></td>
-      <td><span style="color:${getIndColor(o.customer_industry)}">${esc(o.customer_industry)}</span></td>
+      <td><span style="color:${getIndColor(indName)}">${esc(indName)}</span></td>
       <td class="num">${esc(o.prospect_employees)}<div style="font-size:10.5px;color:var(--text-muted)">${esc(o.prospect_revenue)}</div></td>
-      <td><span class="pill pill-review">${esc(o.prospect_brand || '—')}</span></td>
+      <td><span class="pill pill-review">${esc(brandVal)}</span></td>
       <td class="num highlight-val">${o.ml_score != null ? Number(o.ml_score).toFixed(1) : '—'}</td>
       <td style="text-align:center">${gradeBadge(o.ml_grade)}</td>
     </tr>`;
@@ -1662,7 +1742,7 @@ function renderCompLookalikes() {
 
   const selComp = $('comp-lk-filter-comp');
   if (selComp.options.length <= 1) {
-    const comps = [...new Set(lookalikes.map(l => l.competitor))].sort();
+    const comps = [...new Set(lookalikes.map(l => mapCompetitor(l.competitor)))].sort();
     comps.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c;
@@ -1684,7 +1764,8 @@ function filterCompLookalikes() {
   const minSim = Number($('comp-lk-filter-min').value) || 0;
 
   const filtered = lookalikes.filter(l => {
-    if (comp && l.competitor !== comp) return false;
+    const compName = mapCompetitor(l.competitor);
+    if (comp && compName !== comp && l.competitor !== comp) return false;
     if (grade && l.ml_grade !== grade) return false;
     if (l.similarity < minSim) return false;
     if (q && !String(l.prospect_name).toLowerCase().includes(q)) return false;
@@ -1705,19 +1786,22 @@ function filterCompLookalikes() {
 
   let html = '';
   page.forEach(l => {
+    const compName = mapCompetitor(l.competitor);
+    const indName = mapIndustry(l.prospect_industry);
+    const brandVal = (l.prospect_brand === 'GPSI' || l.prospect_brand === 'GPS') ? 'APXI' : (l.prospect_brand || '—');
     html += `<tr>
       <td><b>${esc(l.prospect_name)}</b><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${esc(l.prospect_account_id)}</div></td>
-      <td><span style="color:${getIndColor(l.prospect_industry)}">${esc(l.prospect_industry)}</span></td>
+      <td><span style="color:${getIndColor(indName)}">${esc(indName)}</span></td>
       <td class="num">${esc(l.prospect_employees)}<div style="font-size:10.5px;color:var(--text-muted)">${esc(l.prospect_revenue)}</div></td>
-      <td><span class="pill pill-review">${esc(l.prospect_brand || '—')}</span></td>
+      <td><span class="pill pill-review">${esc(brandVal)}</span></td>
       <td class="num">
         <div class="sim-meter">
           <span>${l.similarity}%</span>
           <div class="sim-meter-bar"><div class="sim-meter-fill" style="width:${l.similarity}%"></div></div>
         </div>
       </td>
-      <td><b>${esc(l.matched_customer)}</b><div style="font-size:10.5px;color:var(--text-muted)">${esc(l.matched_customer_industry_detail || '')}</div></td>
-      <td>${esc(l.competitor)}</td>
+      <td><b>${esc(l.matched_customer)}</b><div style="font-size:10.5px;color:var(--text-muted)">${esc(mapSubIndustry(l.matched_customer_industry_detail) || '')}</div></td>
+      <td>${esc(compName)}</td>
       <td class="num highlight-val">${l.ml_score != null ? Number(l.ml_score).toFixed(1) : '—'}</td>
       <td style="text-align:center">${gradeBadge(l.ml_grade)}</td>
     </tr>`;
@@ -1840,6 +1924,12 @@ function renderDrawerBody() {
     html += '<tr>';
     d.columns.forEach(c => {
       let val = r[c.k];
+      if (c.k === 'industry' || c.k === 'Industry') val = mapIndustry(val);
+      if (c.k === 'sub_industry' || c.k === 'Sub-Industry' || c.k === 'industry_detail') val = mapSubIndustry(val);
+      if (c.k === 'competitor') val = mapCompetitor(val);
+      if (c.k === 'brand' || c.k === 'Brand__c') {
+        if (val === 'GPSI' || val === 'GPS') val = 'APXI';
+      }
       let display = esc(val == null ? '—' : val);
 
       if (c.money) display = fmt(val);
